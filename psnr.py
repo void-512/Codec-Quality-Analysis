@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 
 logFolderName = 'logs'
 
+# generateSingleLog(reference, target, logfile): Generate a PSNR log with given reference and video
+# reference: string, path to video as reference
+# target: string, path to video to be compared
+# logfile: string, path to log that will be generated
 def generateSingleLog(reference, target, logfile):
 
     command = [
@@ -17,6 +21,9 @@ def generateSingleLog(reference, target, logfile):
 
     print(f'PSNR log for {target} finished')
 
+# constructDF(logfile): Construct a DataFrame based on the PSNR logs
+# logfile: string, path to log to construct DataFrame
+# return DataFrame: DataFrame to store PSNR logs
 def constructDF(logfile):
     n_values = []
     psnr_avg_values = []
@@ -31,15 +38,14 @@ def constructDF(logfile):
 
     return pd.DataFrame({'n': n_values, 'psnr_avg': psnr_avg_values})
 
-def generateLogs():
+# generateLogs(logInformation): Generate PSNR logs for all generated videos to log folder
+# logInformation: DataFrame, storing the location information of logs
+def generateLogs(logInformation):
     if not os.path.exists(logFolderName):
         os.makedirs(logFolderName)
-    folders = []
-    workDirectoryItems = os.listdir()
-    for item in workDirectoryItems:
-        if os.path.isdir(item) and item != logFolderName:
-            folders.append(item)
-    for subfolder in folders:
-        transcodedItems = os.listdir()
-        for video in transcodedItems:
-            generateSingleLog()
+    for index, data in logInformation.iterrows():
+        if not os.path.isfile(data['Log Location']):
+            generateSingleLog(data['Reference Path'], data['Current Path'], data['Log Location'])
+        else:
+            print("Log already exist, skip")
+        
