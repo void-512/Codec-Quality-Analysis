@@ -27,6 +27,7 @@ def generateConfigDF(configFileName):
     videosList = file.readline().split()
     codecsList = file.readline().split()
     bitratesList = file.readline().split()
+    file.close()
 
     # Unify upper/lower cases
     for i in range(len(codecsList)):
@@ -47,7 +48,3 @@ def generateConfigDF(configFileName):
     dfCodec = pd.DataFrame({'Codec': pklCodecList})
     dfBitrate = pd.DataFrame({'Bitrate': pklBitratesList})
     return dfVideo, dfCodec, dfBitrate
-
-def storeConfigToPKL(dfVideo, dfCodec, dfBitrate):
-    with open('data.pkl', 'wb') as file:
-        pickle.dump((dfVideo, dfCodec, dfBitrate), file)
