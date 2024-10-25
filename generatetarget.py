@@ -1,50 +1,25 @@
-'''
-    This file generate the videos with required codec and bitrate.
-'''
-
 import os
 import subprocess
+import readandstore
+import pandas as pd
 
-# Read desired files, codecs, and bitrates
-# input_file: string
-def readparameter(input_file):
-    file = open(input_file, 'r')
+# singleVideoGenerator(originalVideo, codec, bitrate, path): Generate videos with desired codec and bitrate.
+# originalVideo: string, path to video as reference
+# codec: string, desired codec name
+# bitrate: string, desired bitrate
+# return string: name of generated video
+def singleVideoGenerator(originalVideo, codec, bitrate, path):
 
-    videos = file.readline()
-    codecs = file.readline()
-    bitrates = file.readline()
-
-    videos_list = videos.split()
-    codecs_list = codecs.split()
-    bitrates_list = bitrates.split()
-
-    return videos_list, codecs_list, bitrates_list
-
-# Remove the extension name of {input_file}.
-# input_file: string
-def removeExtension(input_file):
-    extensionLocation = input_file.rfind('.')
-    return input_file[:extensionLocation:1]
-
-# Generate videos with desired codec and bitrate.
-# input_file: string
-# codec: string
-# bitrate: string
-def singleVideoGenerator(input_file, codec, bitrate):
-
-    codec = codec.lower()
-    bitrate = bitrate.upper()
-
-    input_name = removeExtension(input_file)
+    outputFileName = codec + '_' + bitrate + '.mp4'
 
     try:
         command = [
             'ffmpeg',
-            '-i', input_file,
+            '-i', originalVideo,
             '-c:v', codec,                              # Desired codec
             '-b:v', bitrate,                            # Desired bitrate
             '-an',                                      # Mute
-            codec + '_' + bitrate + '.mp4'              # Output file 
+            path + outputFileName                      # Output file 
         ]
 
         # Ensure HEVC video playable on QuickTime Player
@@ -52,29 +27,52 @@ def singleVideoGenerator(input_file, codec, bitrate):
             command.insert(-1, '-vtag')
             command.insert(-1, 'hvc1')
 
-        # Run the FFmpeg command
-        subprocess.run(command, check=True)
-
-        print(f"Generation success: {codec}_{bitrate}.mp4")
+        if not os.path.isfile(path + outputFileName):
+            subprocess.run(command, check=True)
+            print(f"Generation success: {outputFileName}")
+        else:
+            print(f"{outputFileName} already exist, skip")
 
     except subprocess.CalledProcessError as e:
         print(f"An error occurred while running FFmpeg: {e}")
+    
+    return outputFileName
 
-# Generate videos with desired codecs and bitrates, each video will have a result with every codec and bitrate from parameter list.
-# input_files: list
-# codecs: list
-# bitrates: list
-def videosGenerator(input_files, codecs, bitrates):
-    for input_video in input_files:
+# videosGenerator(originalVideos, codecs, bitrates): Generate videos with desired codecs and bitrates, 
+# each video will have a result with every codec and bitrate from parameter list.
+# originalVideos: list, names of reference videos
+# codecs: list, names of desired codecs
+# bitrates: list, desired bitrates
+# return DataFrame: stores the position information of videos and logs
+def videosGenerator(originalVideos, codecs, bitrates):
+    originalVideoNames = []
+    originalVideoPaths = []
+    currentVideoPath = []
+    currentVideoCodec = []
+    currentVideoBitrate = []
+    currentVideoLogLocation = []
+
+    for inputVideo in originalVideos:
         for codec in codecs:
-            foldername = removeExtension(input_video) + '_' + codec
+            originalVideoName = readandstore.separateExtension(inputVideo)[0]
+            foldername = originalVideoName + '_' + codec
+            
             if not os.path.exists(foldername):
                 os.makedirs(foldername)
-            os.chdir(foldername)
+
             for bitrate in bitrates:
-                singleVideoGenerator('../' + input_video, codec, bitrate)
-            os.chdir('..')
+                generatedVideoFullName = singleVideoGenerator(inputVideo, codec, bitrate, foldername + '/')
+                originalVideoNames.append(originalVideoName)
+                originalVideoPaths.append(os.path.abspath(inputVideo))
+                currentVideoPath.append(os.path.abspath(foldername + '/' + generatedVideoFullName))
+                currentVideoCodec.append(codec)
+                currentVideoBitrate.append(bitrate)
+                currentVideoLogLocation.append(os.path.abspath('logs') + '/' + originalVideoName + '_' + codec + '_' + bitrate + '.log')
 
-
-videos, codecs, bitrates = readparameter('parameters.txt')
-videosGenerator(videos, tcodecs, bitrates)
+    df = pd.DataFrame({'Reference Name': originalVideoNames,
+                        'Reference Path': originalVideoPaths,
+                        'Current Path': currentVideoPath,
+                        'Codec': currentVideoCodec,
+                        'Bitrate': currentVideoBitrate,
+                        'Log Location': currentVideoLogLocation})
+    return df
