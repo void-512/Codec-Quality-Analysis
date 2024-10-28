@@ -18,4 +18,4 @@ bitrate1 bitrate2
 3.
 run "python generate log.py" for log generation
 
-run "graph generation.py" for PSNR graphs
+run "python graph generation.py" for PSNR graphs
