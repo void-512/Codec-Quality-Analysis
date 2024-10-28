@@ -24,7 +24,7 @@ def convertToNumeric(value):
 # return string: name of generated video
 def singleVideoGenerator(originalVideo, codec, bitrate, path):
 
-    outputFileName = codec + '_' + bitrate + '.mov'
+    outputFileName = codec + '_' + bitrate + '.mp4'
 
     try:
         command = [
