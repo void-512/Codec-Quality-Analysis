@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 def loadPickle(pkl):
     graphingDF = pd.read_pickle('data.pkl')
     graphingDF.drop(['Reference Path', 'Current Path'], axis=1, inplace=True)
-    graphingDF['Bitrate'] = graphingDF['Bitrate'].apply(convertToNumeric)
+    # Use the actual bitrate instead, so comment out the conversion of theoretical bitrate
+    # graphingDF['Bitrate'] = graphingDF['Bitrate'].apply(convertToNumeric)
     return graphingDF
 
 # convertToNumeric(value): change the bitrate '1k' '2m' to corresponding numeric values
