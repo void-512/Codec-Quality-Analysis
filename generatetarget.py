@@ -2,6 +2,7 @@ import os
 import subprocess
 import readandstore
 import pandas as pd
+import ffmpeg
 
 # singleVideoGenerator(originalVideo, codec, bitrate, path): Generate videos with desired codec and bitrate.
 # originalVideo: string, path to video as reference
@@ -62,11 +63,12 @@ def videosGenerator(originalVideos, codecs, bitrates):
 
             for bitrate in bitrates:
                 generatedVideoFullName = singleVideoGenerator(inputVideo, codec, bitrate, foldername + '/')
+                currentVideoAbsPath = os.path.abspath(foldername + '/' + generatedVideoFullName)
                 originalVideoNames.append(originalVideoName)
                 originalVideoPaths.append(os.path.abspath(inputVideo))
-                currentVideoPath.append(os.path.abspath(foldername + '/' + generatedVideoFullName))
+                currentVideoPath.append(currentVideoAbsPath)
                 currentVideoCodec.append(codec)
-                currentVideoBitrate.append(bitrate)
+                currentVideoBitrate.append(getBitrate(currentVideoAbsPath))
                 currentVideoLogLocation.append(os.path.abspath('logs') + '/' + originalVideoName + '_' + codec + '_' + bitrate + '.log')
 
     df = pd.DataFrame({'Reference Name': originalVideoNames,
@@ -76,3 +78,19 @@ def videosGenerator(originalVideos, codecs, bitrates):
                         'Bitrate': currentVideoBitrate,
                         'Log Location': currentVideoLogLocation})
     return df
+
+# getBitrate(videoFile): return the actual bitrate of video gained from ffprobe
+# videoFile: string, path to the target video
+# return int: bitrate of video stream
+def getBitrate(videoFile):
+    try:
+        probe = ffmpeg.probe(videoFile)
+        for stream in probe['streams']:
+            if stream['codec_type'] == 'video':
+                return int(stream['bit_rate'])
+            else:
+                print('No video stream found')
+                return None
+    except ffmpeg.Error as e:
+        print(f"ffmpeg error: {e.stderr.decode()}")
+        return None
