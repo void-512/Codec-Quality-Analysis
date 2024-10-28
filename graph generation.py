@@ -1,5 +1,6 @@
 import pandas as pd
 import re
+import matplotlib.pyplot as plt
 
 # loadPickle(pkl): load dataframe from pkl  and make necessary process for graphing
 # pkl: string, path to .pkl file
@@ -45,13 +46,24 @@ def getAllPSNR(df):
         PSNR.append(getAvgPSNR(log))
     df['PSNR'] = PSNR
 
+# generateGraph(df): generate graphs with given Data Frame
+# df: DataFrame with necessary information
+def generateGraph(df):
+    referenceList = df['Reference Name'].unique()
+    codecList = df['Codec'].unique()
+    for video in referenceList:
+        plt.figure(figsize=(10, 6))
+        plt.title(f'PSNR vs Bitrate for {video}')
+        plt.xlabel('Bitrate (mbps)')
+        plt.ylabel('PSNR (dB)')
+        filterByVideo = df[df['Reference Name'] == video]
+        for codec in codecList:
+            filterByCodec = filterByVideo[filterByVideo['Codec'] == codec]
+            plt.plot(filterByCodec['Bitrate'], filterByCodec['PSNR'], label=f'Codec: {codec}', marker='o')
+        plt.legend()
+        plt.grid(True)
+    plt.show()
+
 graphingDF = loadPickle('data.pkl')
-grouped = graphingDF.groupby(['Reference Name', 'Codec'])
-
 getAllPSNR(graphingDF)
-    
-for group_name, group_data in grouped:
-    print(f"Group: {group_name}")
-    print(group_data)
-    print()
-
+generateGraph(graphingDF)
