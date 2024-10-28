@@ -16,11 +16,11 @@ def loadPickle(pkl):
 # value: string, bitrate
 # return float: numeric value of bitrate
 def convertToNumeric(value):
-    if value.endswith('K'):
+    if value.endswith(('k', 'K')):
         return float(value[:-1]) * 1_000
-    elif value.endswith('M'):
+    elif value.endswith(('m', 'M')):
         return float(value[:-1]) * 1_000_000
-    elif value.endswith('G'):
+    elif value.endswith(('g', 'G')):
         return float(value[:-1]) * 1_000_000_000
     else:
         return float(value)

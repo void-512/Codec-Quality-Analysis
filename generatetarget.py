@@ -4,6 +4,19 @@ import readandstore
 import pandas as pd
 import ffmpeg
 
+# convertToNumeric(value): change the bitrate '1k' '2m' to corresponding numeric values
+# value: string, bitrate
+# return float: numeric value of bitrate
+def convertToNumeric(value):
+    if value.endswith(('k', 'K')):
+        return float(value[:-1]) * 1_000
+    elif value.endswith(('m', 'M')):
+        return float(value[:-1]) * 1_000_000
+    elif value.endswith(('g', 'G')):
+        return float(value[:-1]) * 1_000_000_000
+    else:
+        return float(value)
+
 # singleVideoGenerator(originalVideo, codec, bitrate, path): Generate videos with desired codec and bitrate.
 # originalVideo: string, path to video as reference
 # codec: string, desired codec name
@@ -11,16 +24,17 @@ import ffmpeg
 # return string: name of generated video
 def singleVideoGenerator(originalVideo, codec, bitrate, path):
 
-    outputFileName = codec + '_' + bitrate + '.mp4'
+    outputFileName = codec + '_' + bitrate + '.mov'
 
     try:
         command = [
             'ffmpeg',
             '-i', originalVideo,
-            '-c:v', codec,                              # Desired codec
-            '-b:v', bitrate,                            # Desired bitrate
-            '-an',                                      # Mute
-            path + outputFileName                      # Output file 
+            '-c:v', codec,                                          # Desired codec
+            '-b:v', bitrate,                                        # Desired bitrate
+            '-bufsize', str(2 * int(bitrate[:-1])) + bitrate[-1],   # Stabilize bitrate
+            '-an',                                                  # Mute
+            path + outputFileName                                   # Output file 
         ]
 
         # Ensure HEVC video playable on QuickTime Player
