@@ -14,10 +14,10 @@ def generateSingleLog(reference, target, logfile):
     command = [
         'ffmpeg', '-i', reference, '-i', target,
         '-lavfi', f'psnr=stats_file={logfile}', 
+        '-loglevel', 'quiet',
         '-f', 'null', '-'
     ]
-
-    subprocess.run(command, check=True)
+    subprocess.run(command)
 
     print(f'PSNR log for {target} finished')
 

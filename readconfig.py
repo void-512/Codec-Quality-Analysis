@@ -1,5 +1,10 @@
 import pandas as pd
 import pickle
+import configparser
+import tempfile
+import os
+import shutil
+import sys
 
 # separateExtension(inputFile): Remove the extension name of {inputFile}.
 # fileName: string, file name to be processed
@@ -10,24 +15,31 @@ def separateExtension(fileName):
     extensionLocation = fileName.rfind('.')
     return fileName[:extensionLocation:1], fileName[extensionLocation::1]
 
-# generateConfigDF(configFileName): Generate a DataFrame storing the config
-# configFileName: string, path to the config file
+# generateConfigDF(cfg): Generate a DataFrame storing the config
+# cfg: string, path to the config file
 # return
 #   DataFrame: file name and file extension of videos
 #   DataFrame: desired codecs
 #   DataFrame: desired bitrates
-def generateConfigDF(configFileName):
+def generateConfigDF(cfg):
+    configObj = configparser.ConfigParser()
+    configObj.read(cfg)
+    videosList = configObj.get('config','reference').split()
+    codecsList = configObj.get('config','codec').split()
+    bitratesList = configObj.get('config','bitrate').split()
+
+    pwd = None
+
+    workEnv(pwd, configObj, cfg)
+    
+    os.chdir(pwd)
+
+    sys.exit(pwd)
+
     pklNameList = []
     pklExtensionList = []
     pklCodecList = []
     pklBitratesList = []
-
-    # Read config
-    file = open(configFileName, 'r')
-    videosList = file.readline().split()
-    codecsList = file.readline().split()
-    bitratesList = file.readline().split()
-    file.close()
 
     # Unify upper/lower cases
     for i in range(len(codecsList)):
@@ -48,3 +60,31 @@ def generateConfigDF(configFileName):
     dfCodec = pd.DataFrame({'Codec': pklCodecList})
     dfBitrate = pd.DataFrame({'Bitrate': pklBitratesList})
     return dfVideo, dfCodec, dfBitrate
+
+def workEnv(pwd, configObj, cfg):
+    if pwd is None:
+        folder = 'codec compare environment'
+        workdir = os.path.join(tempfile.gettempdir(), folder)
+        if not os.path.isdir(workdir):
+            os.mkdir(workdir)
+            pwd = workdir
+        else:
+            deleteFolder(workdir)
+            pwd = workEnv(pwd, configObj, cfg)
+        with open(cfg, 'w') as configfile:
+            configObj.add_section('workdir')
+            configObj.set('workdir', 'dir', pwd)
+            configObj.write(configfile)
+            configfile.close()
+    elif not os.path.isdir(pwd, configObj):
+        os.mkdir(pwd)
+        return
+    else:
+        return
+
+def deleteFolder(path):
+    try:
+        shutil.rmtree(path)
+        return
+    except FileNotFoundError:
+        return

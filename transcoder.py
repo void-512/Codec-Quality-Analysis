@@ -1,21 +1,7 @@
 import os
-import subprocess
-import readandstore
+import readconfig
 import pandas as pd
 import ffmpeg
-
-# convertToNumeric(value): change the bitrate '1k' '2m' to corresponding numeric values
-# value: string, bitrate
-# return float: numeric value of bitrate
-def convertToNumeric(value):
-    if value.endswith(('k', 'K')):
-        return float(value[:-1]) * 1_000
-    elif value.endswith(('m', 'M')):
-        return float(value[:-1]) * 1_000_000
-    elif value.endswith(('g', 'G')):
-        return float(value[:-1]) * 1_000_000_000
-    else:
-        return float(value)
 
 # singleVideoGenerator(originalVideo, codec, bitrate, path): Generate videos with desired codec and bitrate.
 # originalVideo: string, path to video as reference
@@ -25,31 +11,29 @@ def convertToNumeric(value):
 def singleVideoGenerator(originalVideo, codec, bitrate, path):
 
     outputFileName = codec + '_' + bitrate + '.mp4'
+    outputPath = os.path.join(path, outputFileName)
 
     try:
-        command = [
-            'ffmpeg',
-            '-i', originalVideo,
-            '-c:v', codec,                                          # Desired codec
-            '-b:v', bitrate,                                        # Desired bitrate
-            '-bufsize', str(2 * int(bitrate[:-1])) + bitrate[-1],   # Stabilize bitrate
-            '-an',                                                  # Mute
-            path + outputFileName                                   # Output file 
-        ]
-
-        # Ensure HEVC video playable on QuickTime Player
-        if (codec.find('hevc') != -1) or (codec.find('265') != -1):
-            command.insert(-1, '-vtag')
-            command.insert(-1, 'hvc1')
+        stream = (
+            ffmpeg
+            .input(originalVideo)
+            .output(
+                outputPath,
+                vcodec = codec,
+                **{'b:v': bitrate},
+                bufsize = str(2 * int(bitrate[:-1])) + bitrate[-1],
+            )
+            .global_args('-an')
+        )
 
         if not os.path.isfile(path + outputFileName):
-            subprocess.run(command, check=True)
+            stream.run(overwrite_output=True)
             print(f"Generation success: {outputFileName}")
         else:
             print(f"{outputFileName} already exist, skip")
 
-    except subprocess.CalledProcessError as e:
-        print(f"An error occurred while running FFmpeg: {e}")
+    except ffmpeg.Error as e:
+        print(f"An error occurred while running FFmpeg: {e.stderr.decode('utf-8')}")
     
     return outputFileName
 
@@ -61,7 +45,7 @@ def singleVideoGenerator(originalVideo, codec, bitrate, path):
 # return DataFrame: stores the position information of videos and logs
 def videosGenerator(originalVideos, codecs, bitrates):
     originalVideoNames = []
-    originalVideoPaths = []
+    originalVideoPath = []
     currentVideoPath = []
     currentVideoCodec = []
     currentVideoBitrate = []
@@ -69,24 +53,24 @@ def videosGenerator(originalVideos, codecs, bitrates):
 
     for inputVideo in originalVideos:
         for codec in codecs:
-            originalVideoName = readandstore.separateExtension(inputVideo)[0]
-            foldername = originalVideoName + '_' + codec
+            originalVideoName = os.path.basename(readconfig.separateExtension(inputVideo)[0])
+            foldername = os.path.basename(originalVideoName) + '_' + codec
             
             if not os.path.exists(foldername):
                 os.makedirs(foldername)
 
             for bitrate in bitrates:
                 generatedVideoFullName = singleVideoGenerator(inputVideo, codec, bitrate, foldername + '/')
-                currentVideoAbsPath = os.path.abspath(foldername + '/' + generatedVideoFullName)
+                currentVideoPwd = foldername + '/' + generatedVideoFullName
                 originalVideoNames.append(originalVideoName)
-                originalVideoPaths.append(os.path.abspath(inputVideo))
-                currentVideoPath.append(currentVideoAbsPath)
+                originalVideoPath.append(inputVideo)
+                currentVideoPath.append(currentVideoPwd)
                 currentVideoCodec.append(codec)
-                currentVideoBitrate.append(getBitrate(currentVideoAbsPath))
-                currentVideoLogLocation.append(os.path.abspath('logs') + '/' + originalVideoName + '_' + codec + '_' + bitrate + '.log')
+                currentVideoBitrate.append(getBitrate(currentVideoPwd))
+                currentVideoLogLocation.append('logs' + '/' + originalVideoName + '_' + codec + '_' + bitrate + '.log')
 
     df = pd.DataFrame({'Reference Name': originalVideoNames,
-                        'Reference Path': originalVideoPaths,
+                        'Reference Path': originalVideoPath,
                         'Current Path': currentVideoPath,
                         'Codec': currentVideoCodec,
                         'Bitrate': currentVideoBitrate,

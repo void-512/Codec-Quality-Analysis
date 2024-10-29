@@ -1,6 +1,8 @@
 import pandas as pd
 import re
 import matplotlib.pyplot as plt
+import os
+import sys
 
 # loadPickle(pkl): load dataframe from pkl  and make necessary process for graphing
 # pkl: string, path to .pkl file
@@ -31,12 +33,20 @@ def convertToNumeric(value):
 def getAvgPSNR(logFile):
     frameAvgList = []
     pattern = r'psnr_avg:(\d+\.\d+)'
-    with open(logFile, 'r') as file:
-        for line in file:
-            match = re.search(pattern, line)
-            if match:
-                framePSNR = float(match.group(1))
-                frameAvgList.append(framePSNR)
+    try:
+        with open(logFile, 'r') as file:
+            for line in file:
+                match = re.search(pattern, line)
+                if match:
+                    framePSNR = float(match.group(1))
+                    frameAvgList.append(framePSNR)
+    except FileNotFoundError:
+        sys.exit(f"The log \'{logFile}\' doesn't exist, please run the log generation first")
+
+    if len(frameAvgList) == 0:
+        os.remove(logFile)
+        sys.exit("Error in log file, please generate the log again")
+        
     return sum(frameAvgList) / len(frameAvgList)
 
 # getAllPSNR(df): add a column of PSNR for all logs in df
@@ -55,7 +65,7 @@ def generateGraph(df):
     for video in referenceList:
         plt.figure(figsize=(10, 6))
         plt.title(f'PSNR vs Bitrate for {video}')
-        plt.xlabel('Bitrate (mbps)')
+        plt.xlabel('Bitrate')
         plt.ylabel('PSNR (dB)')
         filterByVideo = df[df['Reference Name'] == video]
         for codec in codecList:
