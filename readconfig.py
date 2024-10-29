@@ -30,12 +30,15 @@ def generateConfigDF(cfg):
 
     pwd = None
 
-    workEnv(pwd, configObj, cfg)
-    
+    if not configObj.has_section('workdir') or not configObj.has_option('workdir', 'dir'):
+
+        pwd = ensureEnv(None, configObj, cfg)
+    else:
+        pwd = configObj.get('workdir', 'dir')
+        ensureEnv(pwd, configObj, cfg)
+
     os.chdir(pwd)
-
-    sys.exit(pwd)
-
+    
     pklNameList = []
     pklExtensionList = []
     pklCodecList = []
@@ -61,26 +64,28 @@ def generateConfigDF(cfg):
     dfBitrate = pd.DataFrame({'Bitrate': pklBitratesList})
     return dfVideo, dfCodec, dfBitrate
 
-def workEnv(pwd, configObj, cfg):
+def ensureEnv(pwd, configObj, cfg):
     if pwd is None:
         folder = 'codec compare environment'
         workdir = os.path.join(tempfile.gettempdir(), folder)
         if not os.path.isdir(workdir):
             os.mkdir(workdir)
-            pwd = workdir
         else:
             deleteFolder(workdir)
-            pwd = workEnv(pwd, configObj, cfg)
+            os.mkdir(workdir)
         with open(cfg, 'w') as configfile:
-            configObj.add_section('workdir')
-            configObj.set('workdir', 'dir', pwd)
+            if not configObj.has_section('workdir'):
+                configObj.add_section('workdir')
+            configObj.set('workdir', 'dir', workdir)
             configObj.write(configfile)
             configfile.close()
-    elif not os.path.isdir(pwd, configObj):
+    elif not os.path.isdir(pwd):
         os.mkdir(pwd)
-        return
+        workdir = pwd
     else:
-        return
+        workdir = pwd
+
+    return workdir
 
 def deleteFolder(path):
     try:
