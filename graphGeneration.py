@@ -73,6 +73,8 @@ def generateGraph(df):
             plt.plot(filterByCodec['Bitrate'], filterByCodec['PSNR'], label=f'Codec: {codec}', marker='o')
         plt.legend()
         plt.grid(True)
+    # windwos cannot display figure
+    # plt.savefig('pic.png')
     plt.show()
 
 graphingDF = loadPickle('data.pkl')
