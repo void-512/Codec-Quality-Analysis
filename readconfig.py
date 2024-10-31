@@ -31,11 +31,10 @@ def generateConfigDF(cfg):
     pwd = None
 
     if not configObj.has_section('workdir') or not configObj.has_option('workdir', 'dir'):
-
-        pwd = ensureEnv(None, configObj, cfg)
+        pwd = ensureEnv(None, cfg)
     else:
         pwd = configObj.get('workdir', 'dir')
-        ensureEnv(pwd, configObj, cfg)
+        ensureEnv(pwd, cfg)
 
     os.chdir(pwd)
     
@@ -64,7 +63,12 @@ def generateConfigDF(cfg):
     dfBitrate = pd.DataFrame({'Bitrate': pklBitratesList})
     return dfVideo, dfCodec, dfBitrate
 
-def ensureEnv(pwd, configObj, cfg):
+# ensureEnv(pwd, cfg): check if work directory exists. If pwd doesn't exist, use the default TEMP folder
+#   and write to the config file. If pwd exist, doesn't do anything.
+# pwd: string, path to work directory
+# cfg: string, path to config file
+# return string: path to work directory
+def ensureEnv(pwd, cfg):
     if pwd is None:
         folder = 'codec compare environment'
         workdir = os.path.join(tempfile.gettempdir(), folder)
@@ -73,20 +77,27 @@ def ensureEnv(pwd, configObj, cfg):
         else:
             deleteFolder(workdir)
             os.mkdir(workdir)
+
         with open(cfg, 'w') as configfile:
+            configObj = configparser.ConfigParser()
+            configObj.read(cfg)
             if not configObj.has_section('workdir'):
                 configObj.add_section('workdir')
             configObj.set('workdir', 'dir', workdir)
             configObj.write(configfile)
             configfile.close()
+
     elif not os.path.isdir(pwd):
         os.mkdir(pwd)
         workdir = pwd
+
     else:
         workdir = pwd
 
     return workdir
 
+# deleteFolder(path): delete folder at {path} and all of its contents
+# path: string, path to target
 def deleteFolder(path):
     try:
         shutil.rmtree(path)

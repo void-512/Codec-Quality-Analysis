@@ -1,9 +1,6 @@
 import os
 import subprocess
 import pandas as pd
-import matplotlib.pyplot as plt
-
-logFolderName = 'logs'
 
 # generateSingleLog(reference, target, logfile): Generate a PSNR log with given reference and video
 # reference: string, path to video as reference
@@ -41,8 +38,8 @@ def constructDF(logfile):
 # generateLogs(logInformation): Generate PSNR logs for all generated videos to log folder
 # logInformation: DataFrame, storing the location information of logs
 def generateLogs(logInformation):
-    if not os.path.exists(logFolderName):
-        os.makedirs(logFolderName)
+    if not os.path.exists('logs'):
+        os.makedirs('logs')
     for index, data in logInformation.iterrows():
         if not os.path.isfile(data['Log Location']):
             generateSingleLog(data['Reference Path'], data['Current Path'], data['Log Location'])

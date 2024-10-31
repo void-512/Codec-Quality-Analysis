@@ -2,6 +2,7 @@ import os
 import readconfig
 import pandas as pd
 import ffmpeg
+import subprocess
 
 # singleVideoGenerator(originalVideo, codec, bitrate, path): Generate videos with desired codec and bitrate.
 # originalVideo: string, path to video as reference
@@ -9,31 +10,28 @@ import ffmpeg
 # bitrate: string, desired bitrate
 # return string: name of generated video
 def singleVideoGenerator(originalVideo, codec, bitrate, path):
-
     outputFileName = codec + '_' + bitrate + '.mp4'
     outputPath = os.path.join(path, outputFileName)
 
-    try:
-        stream = (
-            ffmpeg
-            .input(originalVideo)
-            .output(
-                outputPath,
-                vcodec = codec,
-                **{'b:v': bitrate},
-                bufsize = str(2 * int(bitrate[:-1])) + bitrate[-1],
-            )
-            .global_args('-an')
-        )
+    command = [
+        'ffmpeg',
+        '-i', originalVideo,
+        '-vcodec', codec,
+        '-b:v', bitrate,
+        '-bufsize', str(2 * int(bitrate[:-1])) + bitrate[-1],
+        '-an',
+        outputPath
+    ]
 
-        if not os.path.isfile(path + outputFileName):
-            stream.run(overwrite_output=True)
+    if not os.path.isfile(path + outputFileName):
+        try:
+            subprocess.run(command, check=True)
             print(f"Generation success: {outputFileName}")
-        else:
-            print(f"{outputFileName} already exist, skip")
-
-    except ffmpeg.Error as e:
-        print(f"An error occurred while running FFmpeg: {e.stderr.decode('utf-8')}")
+        except subprocess.CalledProcessError as e:
+            print(f"An error occurred while running FFmpeg: {e.stderr}")
+            
+    else:
+        print(f"{outputFileName} already exist, skip")
     
     return outputFileName
 
@@ -61,13 +59,14 @@ def videosGenerator(originalVideos, codecs, bitrates):
 
             for bitrate in bitrates:
                 generatedVideoFullName = singleVideoGenerator(inputVideo, codec, bitrate, foldername + '/')
-                currentVideoPwd = foldername + '/' + generatedVideoFullName
+                currentVideoPwd = os.path.join(foldername, generatedVideoFullName)
                 originalVideoNames.append(originalVideoName)
                 originalVideoPath.append(inputVideo)
                 currentVideoPath.append(currentVideoPwd)
                 currentVideoCodec.append(codec)
                 currentVideoBitrate.append(getBitrate(currentVideoPwd))
-                currentVideoLogLocation.append('logs' + '/' + originalVideoName + '_' + codec + '_' + bitrate + '.log')
+                currentVideoLogLocation.append('logs' + '/' + foldername + '_' + bitrate + '.log')
+                os.path.join('logs', foldername + '_' + bitrate + '.log')
 
     df = pd.DataFrame({'Reference Name': originalVideoNames,
                         'Reference Path': originalVideoPath,
@@ -75,6 +74,7 @@ def videosGenerator(originalVideos, codecs, bitrates):
                         'Codec': currentVideoCodec,
                         'Bitrate': currentVideoBitrate,
                         'Log Location': currentVideoLogLocation})
+                        
     return df
 
 # getBitrate(videoFile): return the actual bitrate of video gained from ffprobe

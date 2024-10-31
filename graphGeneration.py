@@ -10,24 +10,9 @@ import sys
 def loadPickle(pkl):
     graphingDF = pd.read_pickle('data.pkl')
     graphingDF.drop(['Reference Path', 'Current Path'], axis=1, inplace=True)
-    # Use the actual bitrate instead, so comment out the conversion of theoretical bitrate
-    # graphingDF['Bitrate'] = graphingDF['Bitrate'].apply(convertToNumeric)
     return graphingDF
 
-# convertToNumeric(value): change the bitrate '1k' '2m' to corresponding numeric values
-# value: string, bitrate
-# return float: numeric value of bitrate
-def convertToNumeric(value):
-    if value.endswith(('k', 'K')):
-        return float(value[:-1]) * 1_000
-    elif value.endswith(('m', 'M')):
-        return float(value[:-1]) * 1_000_000
-    elif value.endswith(('g', 'G')):
-        return float(value[:-1]) * 1_000_000_000
-    else:
-        return float(value)
-
-# getAvgPSNR(logFile): calculate the PSNR based on 1 log
+# getAvgPSNR(logFile): calculate the PSNR based on one log
 # logFile: string, path to log
 # return float: average PSNR in the log
 def getAvgPSNR(logFile):
@@ -49,9 +34,9 @@ def getAvgPSNR(logFile):
         
     return sum(frameAvgList) / len(frameAvgList)
 
-# getAllPSNR(df): add a column of PSNR for all logs in df
+# insertPSNRToDF(df): add a column of PSNR for all logs in df
 # df: DataFrame of log information
-def getAllPSNR(df):
+def insertPSNRToDF(df):
     PSNR = []
     for log in df['Log Location']:
         PSNR.append(getAvgPSNR(log))
@@ -59,7 +44,7 @@ def getAllPSNR(df):
 
 # generateGraph(df): generate graphs with given Data Frame
 # df: DataFrame with necessary information
-def generateGraph(df):
+def generateGraph(df, save, path):
     referenceList = df['Reference Name'].unique()
     codecList = df['Codec'].unique()
     for video in referenceList:
@@ -73,10 +58,7 @@ def generateGraph(df):
             plt.plot(filterByCodec['Bitrate'], filterByCodec['PSNR'], label=f'Codec: {codec}', marker='o')
         plt.legend()
         plt.grid(True)
-    # windwos cannot display figure
-    # plt.savefig('pic.png')
-    plt.show()
-
-graphingDF = loadPickle('data.pkl')
-getAllPSNR(graphingDF)
-generateGraph(graphingDF)
+    if save:
+        plt.savefig(path)
+    else:
+        plt.show()
