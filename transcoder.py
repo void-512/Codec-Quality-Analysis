@@ -26,7 +26,7 @@ def singleVideoGenerator(originalVideo, codec, bitrate, path):
     if not os.path.isfile(path + outputFileName):
         try:
             subprocess.run(command, check=True)
-            print(f"Generation success: {outputFileName}")
+            print(f"Generation success: {outputFileName}, actual bitrate {getBitrate(outputPath)}")
         except subprocess.CalledProcessError as e:
             print(f"An error occurred while running FFmpeg: {e.stderr}")
             

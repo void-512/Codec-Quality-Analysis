@@ -1,10 +1,8 @@
 import pandas as pd
-import pickle
 import configparser
 import tempfile
 import os
 import shutil
-import sys
 
 # separateExtension(inputFile): Remove the extension name of {inputFile}.
 # fileName: string, file name to be processed
@@ -28,6 +26,8 @@ def generateConfigDF(cfg):
     codecsList = configObj.get('config','codec').split()
     bitratesList = configObj.get('config','bitrate').split()
 
+    '''
+
     pwd = None
 
     if not configObj.has_section('workdir') or not configObj.has_option('workdir', 'dir'):
@@ -37,11 +37,12 @@ def generateConfigDF(cfg):
         ensureEnv(pwd, cfg)
 
     os.chdir(pwd)
+    '''
     
-    pklNameList = []
-    pklExtensionList = []
-    pklCodecList = []
-    pklBitratesList = []
+    srcNameList = []
+    srcExtensionList = []
+    targetCodecList = []
+    destBitrateList = []
 
     # Unify upper/lower cases
     for i in range(len(codecsList)):
@@ -51,16 +52,16 @@ def generateConfigDF(cfg):
 
     for video in videosList:
         videoName, videoExtension = separateExtension(video)
-        pklNameList.append(videoName)
-        pklExtensionList.append(videoExtension)
+        srcNameList.append(videoName)
+        srcExtensionList.append(videoExtension)
     for codec in codecsList:
-        pklCodecList.append(codec)
+        targetCodecList.append(codec)
     for bitrate in bitratesList:
-        pklBitratesList.append(bitrate)
+        destBitrateList.append(bitrate)
 
-    dfVideo = pd.DataFrame({'Full Name': videosList, 'Name': pklNameList, 'Extension': pklExtensionList})
-    dfCodec = pd.DataFrame({'Codec': pklCodecList})
-    dfBitrate = pd.DataFrame({'Bitrate': pklBitratesList})
+    dfVideo = pd.DataFrame({'Full Name': videosList, 'Name': srcNameList, 'Extension': srcExtensionList})
+    dfCodec = pd.DataFrame({'Codec': targetCodecList})
+    dfBitrate = pd.DataFrame({'Bitrate': destBitrateList})
     return dfVideo, dfCodec, dfBitrate
 
 # ensureEnv(pwd, cfg): check if work directory exists. If pwd doesn't exist, use the default TEMP folder

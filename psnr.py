@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import pandas as pd
 
@@ -46,3 +47,32 @@ def generateLogs(logInformation):
         else:
             print("Log already exist, skip")
         
+# getAvgPSNR(logFile): calculate the PSNR based on one log
+# logFile: string, path to log
+# return float: average PSNR in the log
+def getAvgPSNR(logFile):
+    frameAvgList = []
+    pattern = r'psnr_avg:(\d+\.\d+)'
+    try:
+        with open(logFile, 'r') as file:
+            for line in file:
+                match = re.search(pattern, line)
+                if match:
+                    framePSNR = float(match.group(1))
+                    frameAvgList.append(framePSNR)
+    except FileNotFoundError:
+        sys.exit(f"The log \'{logFile}\' doesn't exist, please run the log generation first")
+
+    if len(frameAvgList) == 0:
+        os.remove(logFile)
+        sys.exit("Error in log file, please generate the log again")
+        
+    return sum(frameAvgList) / len(frameAvgList)
+
+# insertPSNRToDF(df): add a column of PSNR for all logs in df
+# df: DataFrame of log information
+def insertPSNRToDF(df):
+    PSNR = []
+    for log in df['Log Location']:
+        PSNR.append(getAvgPSNR(log))
+    df['PSNR'] = PSNR
