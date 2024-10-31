@@ -2,7 +2,7 @@ import sys
 import os
 import pandas as pd
 # for windows
-# sys.path.append('D:\\temp\\Experiment Python')
+sys.path.append('D:\\temp\\Experiment Python')
 import psnr
 import transcoder
 import readconfig
@@ -32,7 +32,7 @@ def parserHandler():
     args = parser.parse_args()
     return args
 
-def generateLog(noskip, path='data.pkl'):
+def generateLog(noskip, path):
     if noskip:
         clean('retain reference')
         generateLog(false)
@@ -82,10 +82,7 @@ def main():
         sys.exit('Please specify the config file with -c')
 
     if args.command == 'log':
-        if args.noskip:
-            generateLog(True, args.export)
-        else:
-            generateLog(False, args.export)
+            generateLog(args.noskip, args.export or 'data.pkl')
 
     if args.command == 'graph':
         if args.save:
