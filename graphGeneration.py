@@ -1,11 +1,6 @@
 import os
 import sys
 import matplotlib
-import platform
-if platform.system() == 'Darwin':
-    matplotlib.use('MacOSX')
-else:
-    matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 # generateGraph(df): generate graphs with given Data Frame
