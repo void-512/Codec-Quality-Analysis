@@ -1,11 +1,12 @@
 import os
 import sys
 import matplotlib
-import matplotlib.pyplot as plt
 
 # generateGraph(df): generate graphs with given Data Frame
 # df: DataFrame with necessary information
 def generateGraph(df, save, path):
+    # Avoid generation of font cache when unnecessary
+    import matplotlib.pyplot as plt
     referenceList = df['Reference Name'].unique()
     codecList = df['Codec'].unique()
     for video in referenceList:
