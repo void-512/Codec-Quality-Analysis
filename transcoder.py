@@ -31,7 +31,7 @@ def singleVideoGenerator(originalVideo, codec, bitrate, path):
             print(f"An error occurred while running FFmpeg: {e.stderr}")
             
     else:
-        print(f"{outputFileName} already exist, skip")
+        print(f"{outputFileName} already existed, skip")
     
     return outputFileName
 
