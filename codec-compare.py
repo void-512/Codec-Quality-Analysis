@@ -71,16 +71,15 @@ def main():
     args = parserHandler()
     global dfVideo, dfCodec, dfBitrate
     if args.command == 'clean':
-        clean('all')
-        sys.exit(f'{os.getcwd()} deleted')
-    elif args.c:
-        config = args.c
-        dfVideo, dfCodec, dfBitrate = readconfig.generateConfigDF(config)
-    else:
-        sys.exit('Please specify the config file with -c')
+        clean('retain reference')
+        sys.exit('Generated files deleted')
 
     if args.command == 'log':
+        if args.c:
+            dfVideo, dfCodec, dfBitrate = readconfig.generateConfigDF(config)
             generateLog(args.noskip, args.export or 'data.pkl')
+        else:
+            sys.exit('Please specify the config file with -c')
 
     if args.command == 'graph':
         if args.save:
