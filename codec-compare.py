@@ -1,10 +1,10 @@
-import sys
 import os
-import pandas as pd
+import sys
 import psnr
+import argparse
 import transcoder
 import readconfig
-import argparse
+import pandas as pd
 import graphGeneration
 
 dfVideo, dfCodec, dfBitrate = None, None, None
@@ -33,7 +33,7 @@ def parserHandler():
 def generateLog(noskip, path):
     if noskip:
         clean('retain reference')
-        generateLog(false)
+        generateLog(False, path)
     else:
         videoData = transcoder.videosGenerator(dfVideo['Full Name'], dfCodec['Codec'], dfBitrate['Bitrate'])
         psnr.generateLogs(videoData)
@@ -42,7 +42,7 @@ def generateLog(noskip, path):
 
 def clean(scope):
     nameList = dfVideo['Name']
-    codecList = dfVideo['Codec']
+    codecList = dfCodec['Codec']
     if scope == 'all':
         readconfig.deleteFolder(os.getcwd())
     elif scope == 'retain reference':
@@ -76,7 +76,7 @@ def main():
 
     if args.command == 'log':
         if args.c:
-            dfVideo, dfCodec, dfBitrate = readconfig.generateConfigDF(config)
+            dfVideo, dfCodec, dfBitrate = readconfig.generateConfigDF(args.c)
             generateLog(args.noskip, args.export or 'data.pkl')
         else:
             sys.exit('Please specify the config file with -c')
