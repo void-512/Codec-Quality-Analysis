@@ -1,7 +1,11 @@
 import os
 import sys
 import matplotlib
-matplotlib.use('TkAgg')
+import platform
+if platform.system() == 'Darwin':
+    matplotlib.use('MacOSX')
+else:
+    matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 # generateGraph(df): generate graphs with given Data Frame
@@ -20,7 +24,6 @@ def generateGraph(df, save, path):
             plt.plot(filterByCodec['Bitrate'], filterByCodec['PSNR'], label=f'Codec: {codec}', marker='o')
         plt.legend()
         plt.grid(True)
-    print(matplotlib.get_backend())
     if save:
         plt.savefig(path)
     else:
