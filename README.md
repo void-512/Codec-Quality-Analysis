@@ -2,6 +2,10 @@
 
 A program for you to compare PSNR of video encoders under different bitrates
 
+FFMPEG is required in the system
+
+Make sure the "_internal" folder is in the same directory as the executable file
+
 ## How to generate data
 Write a config file as the "example.cfg" in the repo.
 
@@ -17,7 +21,7 @@ The program will skip logs that already have been generated, so if you want to g
 > codec-compare -c example.cfg log -noskip
 
 ## How to graph
-You'll need a 'data.pkl' file in the work directory
+Make sure a "data.pkl" exists in the work directory
 
 Show the plot with following command:
 > codec-compare graph
@@ -34,3 +38,9 @@ The command will generate a new "data.pkl" at the work folder
 ## How to clean the work folder
 The "clean" command will delete logs folder and all videos generated:
 > codec-compare clean
+
+# How the release version is built?
+Need pandas, ffmpeg-python, matplotlib, and pyinstaller
+
+Build with command:
+> pyinstaller codec-compare.py -p graphGeneration.py -p psnr.py -p readconfig.py -p transcoder.py
