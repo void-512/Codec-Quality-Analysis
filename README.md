@@ -38,7 +38,7 @@ The command will generate a new "data.pkl" at the work folder
 
 ## How to clean the work folder
 The "clean" command will delete logs folder and all videos generated:
-> codec-compare clean
+> codec-compare -c example.cfg clean
 
 # How the release version is built?
 Need pandas, ffmpeg-python, matplotlib, and pyinstaller
