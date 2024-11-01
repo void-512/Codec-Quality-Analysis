@@ -1,8 +1,7 @@
-import pandas as pd
-import configparser
-import tempfile
 import os
 import shutil
+import pandas as pd
+import configparser
 
 # separateExtension(inputFile): Remove the extension name of {inputFile}.
 # fileName: string, file name to be processed
