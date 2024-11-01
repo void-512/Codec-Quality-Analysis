@@ -1,8 +1,8 @@
 import os
-import readconfig
-import pandas as pd
 import ffmpeg
+import readconfig
 import subprocess
+import pandas as pd
 
 # singleVideoGenerator(originalVideo, codec, bitrate, path): Generate videos with desired codec and bitrate.
 # originalVideo: string, path to video as reference
