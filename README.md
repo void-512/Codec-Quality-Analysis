@@ -1,6 +1,7 @@
 # A codec quality comparison program
 
 A program for you to compare PSNR of video encoders under different bitrates
+FFMPEG is required in the system
 
 FFMPEG is required in the system
 
@@ -40,7 +41,11 @@ The "clean" command will delete logs folder and all videos generated:
 > codec-compare clean
 
 # How the release version is built?
+<<<<<<< HEAD
 Need pandas, ffmpeg-python, matplotlib, and pyinstaller
 
 Build with command:
 > pyinstaller codec-compare.py -p graphGeneration.py -p psnr.py -p readconfig.py -p transcoder.py
+=======
+Need pandas, ffmpeg-python, matplotlib, 
+>>>>>>> 0421a8ea4830b571a309ed743d963a5673ca4604
