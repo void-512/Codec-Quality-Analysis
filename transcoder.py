@@ -22,12 +22,13 @@ def singleVideoGenerator(originalVideo, codec, bitrate, path, parm):
         '-b:v', bitrate,
         '-bufsize', str(2 * int(bitrate[:-1])) + bitrate[-1],
         '-an',
+        '-loglevel', 'quiet',
         outputPath
     ]
 
     command = command[:5] + parm + command[5:]
 
-    if not os.path.isfile(path + outputFileName):
+    if not os.path.isfile(outputPath):
         try:
             subprocess.run(command, check=True)
             print(f"Generation success: {outputFileName}, actual bitrate {getBitrate(outputPath)}")
@@ -35,7 +36,7 @@ def singleVideoGenerator(originalVideo, codec, bitrate, path, parm):
             print(f"An error occurred while running FFmpeg: {e.stderr}")
             
     else:
-        print(f"{outputFileName} already existed, skip")
+        print(f"{outputPath} already existed, skip")
     
     return outputFileName
 
@@ -47,22 +48,22 @@ def singleVideoGenerator(originalVideo, codec, bitrate, path, parm):
 # return DataFrame: stores the position information of videos and logs
 def videosGenerator(dfVideo, dfCodec, dfBitrate):
     references = dfVideo['Full Name']
-    customCodecNames = dfCodec['Custom Codec Name']
+    labelList = dfCodec['Label']
     bitrates = dfBitrate['Bitrate']
 
     originalVideoNames = []
     originalVideoPath = []
     currentVideoPath = []
-    customNames = []
+    labels = []
     currentVideoBitrate = []
     currentVideoLogLocation = []
 
     for inputVideo in references:
-        for customName in customCodecNames:
-            codec = dfCodec.loc[dfCodec['Custom Codec Name'] == customName, 'Codec'].values[0]
-            parm = dfCodec.loc[dfCodec['Custom Codec Name'] == customName, 'Parm'].values[0]
+        for label in labelList:
+            codec = dfCodec.loc[dfCodec['Label'] == label, 'Codec'].values[0]
+            parm = dfCodec.loc[dfCodec['Label'] == label, 'Parm'].values[0]
             originalVideoName = os.path.basename(readconfig.separateExtension(inputVideo)[0])
-            foldername = os.path.basename(originalVideoName) + '_' + customName
+            foldername = os.path.basename(originalVideoName) + '_' + label
             
             if not os.path.exists(foldername):
                 os.makedirs(foldername)
@@ -73,14 +74,14 @@ def videosGenerator(dfVideo, dfCodec, dfBitrate):
                 originalVideoNames.append(originalVideoName)
                 originalVideoPath.append(inputVideo)
                 currentVideoPath.append(currentVideoPwd)
-                customNames.append(customName)
+                labels.append(label)
                 currentVideoBitrate.append(getBitrate(currentVideoPwd))
                 currentVideoLogLocation.append(os.path.join('logs', foldername + '_' + bitrate + '.log'))
 
     df = pd.DataFrame({'Reference Name': originalVideoNames,
                         'Reference Path': originalVideoPath,
                         'Current Path': currentVideoPath,
-                        'Custom Name': customNames,
+                        'Label': labels,
                         'Bitrate': currentVideoBitrate,
                         'Log Location': currentVideoLogLocation})
                         

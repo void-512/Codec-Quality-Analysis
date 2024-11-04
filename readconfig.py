@@ -21,7 +21,7 @@ def separateExtension(fileName):
 def generateConfigDF(cfg):
     srcNameList = []
     srcExtensionList = []
-    customCodecName = []
+    labelList = []
     targetCodecList = []
     codecParameterList = []
     destBitrateList = []
@@ -32,7 +32,7 @@ def generateConfigDF(cfg):
     bitratesList = configObj.get('config','bitrate').split()
     
     for name, parm in configObj.items('codec'):
-        customCodecName.append(name)
+        labelList.append(name)
         targetCodecList.append(parm.split()[0])
         codecParameterList.append(parm.split()[1:])
 
@@ -48,7 +48,7 @@ def generateConfigDF(cfg):
         destBitrateList.append(bitrate)
 
     dfVideo = pd.DataFrame({'Full Name': videosList, 'Name': srcNameList, 'Extension': srcExtensionList})
-    dfCodec = pd.DataFrame({'Custom Codec Name': customCodecName, 'Codec': targetCodecList, 'Parm': codecParameterList})
+    dfCodec = pd.DataFrame({'Label': labelList, 'Codec': targetCodecList, 'Parm': codecParameterList})
     dfBitrate = pd.DataFrame({'Bitrate': destBitrateList})
     return dfVideo, dfCodec, dfBitrate
 
@@ -60,3 +60,23 @@ def deleteFolder(path):
         return
     except FileNotFoundError:
         return
+
+# renameLabel(original, new, conf): change the label in the config file
+# original: string, original label name
+# new: string, new label name
+# conf: string, path to config file
+def renameLabel(original, new, conf):
+    config = configparser.ConfigParser()
+    config.read(conf)
+    section = 'codec'
+
+    if config.has_section(section):
+        if config.has_option(section, original):
+            value = config.get(section, original)
+            config.remove_option(section, original)
+            if new is not None:
+                config.set(section, new, value)
+            with open(conf, 'w') as file:
+                config.write(file)
+        else:
+            sys.exit("Target in config not found")

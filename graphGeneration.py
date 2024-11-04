@@ -9,7 +9,7 @@ def generateGraph(df, save, path):
     # Avoid generation of font cache when unnecessary
     import matplotlib.pyplot as plt
     referenceList = df['Reference Name'].unique()
-    nameList = df['Custom Name'].unique()
+    nameList = df['Label'].unique()
     for video in referenceList:
         plt.figure(figsize=(10, 6))
         plt.title(f'PSNR vs Bitrate for {video}')
@@ -17,7 +17,7 @@ def generateGraph(df, save, path):
         plt.ylabel('PSNR (dB)')
         filterByVideo = df[df['Reference Name'] == video]
         for name in nameList:
-            filterByCodec = filterByVideo[filterByVideo['Custom Name'] == name]
+            filterByCodec = filterByVideo[filterByVideo['Label'] == name]
             plt.plot(filterByCodec['Bitrate'], filterByCodec['PSNR'], label=f'Codec: {name}', marker='o')
         plt.legend()
         plt.grid(True)

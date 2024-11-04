@@ -46,7 +46,8 @@ def generateLogs(logInformation):
         if not os.path.isfile(data['Log Location']):
             generateSingleLog(data['Reference Path'], data['Current Path'], data['Log Location'])
         else:
-            print("Log already exist, skip")
+            logFile = data['Log Location']
+            print(f"{logFile} already exist, skip")
         
 # getAvgPSNR(logFile): calculate the PSNR based on one log
 # logFile: string, path to log
