@@ -15,9 +15,13 @@ The example.cfg is an example of config
 Format:
 
 > [config]
+
 > reference = video1 video2 ...
+
 > bitrate = bitrate1 bitrate2 ...
+
 > [codec]
+
 > <codec_name> = <codec> <parameters>
 
 [config] section:
