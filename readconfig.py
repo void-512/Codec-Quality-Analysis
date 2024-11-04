@@ -1,5 +1,4 @@
 import os
-import sys
 import shutil
 import pandas as pd
 import configparser
@@ -51,8 +50,6 @@ def generateConfigDF(cfg):
     dfVideo = pd.DataFrame({'Full Name': videosList, 'Name': srcNameList, 'Extension': srcExtensionList})
     dfCodec = pd.DataFrame({'Custom Codec Name': customCodecName, 'Codec': targetCodecList, 'Parm': codecParameterList})
     dfBitrate = pd.DataFrame({'Bitrate': destBitrateList})
-    print(dfCodec)
-    sys.exit("test")
     return dfVideo, dfCodec, dfBitrate
 
 # deleteFolder(path): delete folder at {path} and all of its contents

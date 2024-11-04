@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.append("D:\\temp\\Experiment Python")
+# sys.path.append("D:\\temp\\Experiment Python")
 import psnr
 import argparse
 import transcoder
@@ -36,7 +36,7 @@ def generateLog(noskip, path):
         clean('retain reference')
         generateLog(False, path)
     else:
-        videoData = transcoder.videosGenerator(dfVideo['Full Name'], dfCodec['Codec'], dfBitrate['Bitrate'])
+        videoData = transcoder.videosGenerator(dfVideo, dfCodec, dfBitrate)
         psnr.generateLogs(videoData)
         psnr.insertPSNRToDF(videoData)
         videoData.to_pickle(path)
