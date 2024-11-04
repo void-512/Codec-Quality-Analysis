@@ -20,7 +20,7 @@ reference = video1 video2 ...
 bitrate = bitrate1 bitrate2 ...
 
 [codec]
-<codec_name> = <codec> <parameters>
+<label> = <codec> <parameters>
 ```
 
 [config] section:
@@ -77,6 +77,20 @@ The command will generate a new "data.pkl" at the work folder
 The "clean" command will delete logs folder and all videos generated:
 ```
 codec-compare -c example.cfg clean
+```
+
+## How to change the name of labels
+The "edit" command will provide functions to rename or delete data
+
+The following command will rename the labels in data
+```
+codec-compare edit -i <data.pkl> -rename <old name> <new name>
+```
+Side effect: change the corresponding folder name and log file names
+
+If config file is provided, the label in config will also be modified
+```
+codec-compare -c <example.cfg> edit -i <data.pkl> -rename <old name> <new name>
 ```
 
 # How the release version is built?
