@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 import pandas as pd
 import configparser
@@ -19,20 +20,24 @@ def separateExtension(fileName):
 #   DataFrame: desired codecs
 #   DataFrame: desired bitrates
 def generateConfigDF(cfg):
+    srcNameList = []
+    srcExtensionList = []
+    customCodecName = []
+    targetCodecList = []
+    codecParameterList = []
+    destBitrateList = []
+
     configObj = configparser.ConfigParser()
     configObj.read(cfg)
     videosList = configObj.get('config','reference').split()
-    codecsList = configObj.get('config','codec').split()
     bitratesList = configObj.get('config','bitrate').split()
     
-    srcNameList = []
-    srcExtensionList = []
-    targetCodecList = []
-    destBitrateList = []
+    for name, parm in configObj.items('codec'):
+        customCodecName.append(name)
+        targetCodecList.append(parm.split()[0])
+        codecParameterList.append(parm.split()[1:])
 
     # Unify upper/lower cases
-    for i in range(len(codecsList)):
-        codecsList[i] = codecsList[i].lower()
     for i in range(len(bitratesList)):
         bitratesList[i] = bitratesList[i].upper()
 
@@ -40,14 +45,14 @@ def generateConfigDF(cfg):
         videoName, videoExtension = separateExtension(video)
         srcNameList.append(videoName)
         srcExtensionList.append(videoExtension)
-    for codec in codecsList:
-        targetCodecList.append(codec)
     for bitrate in bitratesList:
         destBitrateList.append(bitrate)
 
     dfVideo = pd.DataFrame({'Full Name': videosList, 'Name': srcNameList, 'Extension': srcExtensionList})
-    dfCodec = pd.DataFrame({'Codec': targetCodecList})
+    dfCodec = pd.DataFrame({'Custom Codec Name': customCodecName, 'Codec': targetCodecList, 'Parm': codecParameterList})
     dfBitrate = pd.DataFrame({'Bitrate': destBitrateList})
+    print(dfCodec)
+    sys.exit("test")
     return dfVideo, dfCodec, dfBitrate
 
 # deleteFolder(path): delete folder at {path} and all of its contents
