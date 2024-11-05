@@ -55,6 +55,8 @@ codec-compare -c example.cfg log -noskip
 ## How to graph
 Make sure a "data.pkl" exists in the work directory
 
+The graph operation only requires "data.pkl" under work directory
+
 Show the plot with following command:
 ```
 codec-compare graph
@@ -79,6 +81,13 @@ The "clean" command will delete logs folder and all videos generated:
 codec-compare -c example.cfg clean
 ```
 
+## How to export certain labels
+The "split" command will split given labels to a new file
+
+```
+codec-compare split -i <data.pkl> -label <label1 label2 ...> -e <new pkl file>
+```
+
 ## How to change the name of labels
 The "edit" command will provide functions to rename or delete data
 
@@ -91,6 +100,18 @@ Side effect: change the corresponding folder name and log file names
 If config file is provided, the label in config will also be modified
 ```
 codec-compare -c <example.cfg> edit -i <data.pkl> -rename <old name> <new name>
+```
+
+## How to delete a label
+The delete option under "edit" command can delete a label in the pkl file
+
+```
+codec-compare edit -i <data.pkl> -delete <label>
+```
+
+If config file is provided, the label in config will also be modified
+```
+codec-compare -c <example.cfg> edit -i <data.pkl> -delete <label>
 ```
 
 # How the release version is built?
