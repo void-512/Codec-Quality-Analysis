@@ -31,7 +31,7 @@ def singleVideoGenerator(originalVideo, codec, bitrate, path, parm):
     if not os.path.isfile(outputPath):
         try:
             subprocess.run(command, check=True)
-            print(f"Generation success: {outputFileName}, actual bitrate {getBitrate(outputPath)}")
+            print(f"Generation success: {outputPath}, actual bitrate {getBitrate(outputPath)}")
         except subprocess.CalledProcessError as e:
             print(f"An error occurred while running FFmpeg: {e.stderr}")
             
@@ -76,7 +76,7 @@ def videosGenerator(dfVideo, dfCodec, dfBitrate):
                 currentVideoPath.append(currentVideoPwd)
                 labels.append(label)
                 currentVideoBitrate.append(getBitrate(currentVideoPwd))
-                currentVideoLogLocation.append(os.path.join('logs', foldername + '_' + bitrate + '.log'))
+                currentVideoLogLocation.append('logs' + '/' + foldername + '_' + bitrate + '.log')
 
     df = pd.DataFrame({'Reference Name': originalVideoNames,
                         'Reference Path': originalVideoPath,

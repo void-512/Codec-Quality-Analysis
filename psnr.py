@@ -9,7 +9,6 @@ import pandas as pd
 # target: string, path to video to be compared
 # logfile: string, path to log that will be generated
 def generateSingleLog(reference, target, logfile):
-
     command = [
         'ffmpeg', '-i', reference, '-i', target,
         '-lavfi', f'psnr=stats_file={logfile}', 
@@ -18,7 +17,7 @@ def generateSingleLog(reference, target, logfile):
     ]
     subprocess.run(command)
 
-    print(f'PSNR log for {target} finished')
+    print(f'PSNR log for {logfile} finished')
 
 # constructDF(logfile): Construct a DataFrame based on the PSNR logs
 # logfile: string, path to log to construct DataFrame
@@ -43,10 +42,10 @@ def generateLogs(logInformation):
     if not os.path.exists('logs'):
         os.makedirs('logs')
     for index, data in logInformation.iterrows():
+        logFile = data['Log Location']
         if not os.path.isfile(data['Log Location']):
-            generateSingleLog(data['Reference Path'], data['Current Path'], data['Log Location'])
+            generateSingleLog(data['Reference Path'], data['Current Path'], logFile)
         else:
-            logFile = data['Log Location']
             print(f"{logFile} already exist, skip")
         
 # getAvgPSNR(logFile): calculate the PSNR based on one log
