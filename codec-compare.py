@@ -10,7 +10,7 @@ import graphGeneration
 dfVideo, dfCodec, dfBitrate = None, None, None
 
 def parserHandler():
-    parser = argparse.ArgumentParser(usage="codec-compare.py [-h] [-c CONFIG_FILE] {log, graph, clean} <options>")
+    parser = argparse.ArgumentParser(usage="codec-compare.py [-h] [-c CONFIG_FILE] {log, graph, clean, merge, edit, list, split} <options>")
     parser.add_argument("-c", type=str, help="Specify the config file")
 
     subparsers = parser.add_subparsers(dest="command", metavar="")
